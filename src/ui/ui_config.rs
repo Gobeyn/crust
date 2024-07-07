@@ -9,7 +9,7 @@ use crate::agenda_parser::parser;
 use crate::argument_handling::handler;
 
 #[derive(Debug)]
-struct MonthAndYear {
+struct MonthAndYear {
     month: i32,
     year: i32,
 }
