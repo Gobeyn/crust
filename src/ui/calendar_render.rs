@@ -6,51 +6,14 @@ use ratatui::prelude::*;
 // Local files
 use crate::calendar_logic::date_conversions;
 
-const MONTHS: [&str; 12] = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-];
-
-// BUG: The month January 2006 does not return the correct result. January 1st is a
-// Sunday and this program shows it on Monday. Similarly for other January months.
-// Perhaps an error occurs in one of the date conversion functions when using January 1st.
-
 pub fn create_calendar_text(month: i32, year: i32) -> Vec<Line<'static>> {
-    let love = Color::Rgb(235, 111, 146);
     let rose = Color::Rgb(234, 154, 151);
     let gold = Color::Rgb(246, 193, 119);
     let overlay = Color::Rgb(57, 53, 82);
     let muted = Color::Rgb(110, 106, 134);
 
     let mut calendar_text: Vec<Line> = Vec::new();
-
-    // Show the month and year
-    let new_month = month - 1;
-    let month_string: String = {
-        if new_month as usize <= MONTHS.len() {
-            MONTHS[new_month as usize].to_string()
-        } else {
-            panic!("'months' input was out of bounds.");
-        }
-    };
-    calendar_text.push(Line::from(Span::raw("")));
-    calendar_text.push(Line::from(Span::styled(
-        format!("{} {}", month_string, year),
-        Style::default()
-            .fg(love)
-            .add_modifier(Modifier::BOLD | Modifier::ITALIC),
-    )));
-    calendar_text.push(Line::from(Span::raw("")));
+    calendar_text.push(Line::from(Span::raw(" ")));
 
     // Show the days
     calendar_text.push(Line::from(Span::styled(

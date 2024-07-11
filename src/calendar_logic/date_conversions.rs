@@ -4,14 +4,17 @@ pub fn date_to_day_of_the_week(day: i32, month: i32, year: i32) -> i32 {
     // is based on Zeller's congruence for Gregorian calendars. More information
     // for this can be found on https://en.wikipedia.org/wiki/Zeller%27s_congruence
 
-    // Make January and February values 13 and 14 instead of 1 and 2
+    // Make January and February values 13 and 14 instead of 1 and 2, note that they are
+    // counted as the 13th and 14th month of the previous year!
     let mut new_month = month;
+    let mut new_year = year;
     if month == 1 || month == 2 {
         new_month += 12;
+        new_year -= 1;
     }
 
-    let year_of_century = year % 100;
-    let zero_based_century = year / 100;
+    let year_of_century = new_year % 100;
+    let zero_based_century = new_year / 100;
 
     let mut day_of_the_week = (day
         + (13 * (new_month + 1) / 5)
@@ -23,7 +26,7 @@ pub fn date_to_day_of_the_week(day: i32, month: i32, year: i32) -> i32 {
 
     // Shift so a value of 1 is Monday up to value of 7 for Sunday.
     // Zeller's congruence results 0 for Saturday up to 6 for Friday.
-    day_of_the_week = (day_of_the_week + 5) % 7 + 1;
+    day_of_the_week = ((day_of_the_week + 5) % 7) + 1;
 
     return day_of_the_week;
 }

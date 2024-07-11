@@ -4,16 +4,8 @@ extern crate getopts;
 extern crate ratatui;
 
 // Local files
-use crust::agenda_parser::parser;
 use crust::argument_handling::handler;
 use crust::ui::{event_handler, ui_config};
-
-fn _main() {
-    let mut filedir: std::path::PathBuf = parser::date_to_filedir(16, 9, 2001);
-    println!("{:?}", filedir);
-    let agenda: parser::Agenda = parser::parse_agenda_toml(&mut filedir);
-    println!("{:?}", agenda);
-}
 
 fn main() -> std::io::Result<()> {
     // Get the arguments for the program and their default values.

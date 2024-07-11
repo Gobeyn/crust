@@ -14,6 +14,21 @@ struct MonthAndYear {
     year: i32,
 }
 
+const MONTHS: [&str; 12] = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+];
+
 fn get_next_month_and_year(month_and_year: &MonthAndYear) -> MonthAndYear {
     let mut next_month = month_and_year.month + 1;
     let mut next_year = month_and_year.year;
@@ -29,6 +44,24 @@ fn get_next_month_and_year(month_and_year: &MonthAndYear) -> MonthAndYear {
     };
 
     return next_month_and_year;
+}
+
+fn get_month_string(month: i32) -> String {
+    let month_string: String = {
+        let month_shift: i32 = month - 1;
+        if month_shift as usize <= MONTHS.len() {
+            MONTHS[month_shift as usize].to_string()
+        } else {
+            panic!("Month index was out of range.");
+        }
+    };
+    return month_string;
+}
+
+fn get_month_year_string(month_and_year: &MonthAndYear) -> String {
+    let month_string = get_month_string(month_and_year.month);
+    let month_year_string = format!(" {} {} ", month_string, month_and_year.year);
+    return month_year_string;
 }
 
 pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn Fn(&mut Frame)> {
@@ -72,20 +105,6 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
             .border_style(Style::default().fg(foam));
 
         // Define three subcalendar blocks for the asked for month and two months ahead
-        let current_month_block = Block::new()
-            .border_type(BorderType::Rounded)
-            .borders(Borders::ALL)
-            .border_style(Style::default().fg(pine));
-        let next_month_block = Block::new()
-            .border_type(BorderType::Rounded)
-            .borders(Borders::ALL)
-            .border_style(Style::default().fg(pine));
-        let second_next_month_block = Block::new()
-            .border_type(BorderType::Rounded)
-            .borders(Borders::ALL)
-            .border_style(Style::default().fg(pine));
-
-        // Define the text to be put into these calendar blocks
         let current_month_and_year = MonthAndYear {
             month: program_args.month,
             year: program_args.year,
@@ -93,6 +112,33 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
         let next_month_and_year = get_next_month_and_year(&current_month_and_year);
         let second_next_month_and_year = get_next_month_and_year(&next_month_and_year);
 
+        let current_month_year_str = get_month_year_string(&current_month_and_year);
+        let next_month_year_str = get_month_year_string(&next_month_and_year);
+        let second_next_month_year_str = get_month_year_string(&second_next_month_and_year);
+
+        let current_month_block = Block::new()
+            .title(current_month_year_str)
+            .title_alignment(Alignment::Center)
+            .title_style(Style::default().fg(love).add_modifier(Modifier::BOLD))
+            .border_type(BorderType::Rounded)
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(pine));
+        let next_month_block = Block::new()
+            .title(next_month_year_str)
+            .title_alignment(Alignment::Center)
+            .title_style(Style::default().fg(love).add_modifier(Modifier::BOLD))
+            .border_type(BorderType::Rounded)
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(pine));
+        let second_next_month_block = Block::new()
+            .title(second_next_month_year_str)
+            .title_alignment(Alignment::Center)
+            .title_style(Style::default().fg(love).add_modifier(Modifier::BOLD))
+            .border_type(BorderType::Rounded)
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(pine));
+
+        // Define the text to be put into these calendar blocks
         let current_month_text = calendar_render::create_calendar_text(
             current_month_and_year.month,
             current_month_and_year.year,
@@ -152,7 +198,7 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
         // Define blocks for submodules in preview
         let current_preview_block = Block::new()
             .title(format!(
-                " Agenda | {}-{}-{} ",
+                " Agenda 󰇙 {}-{}-{} ",
                 program_args.day, program_args.month, program_args.year
             ))
             .title_alignment(Alignment::Center)
