@@ -13,7 +13,7 @@ pub struct DayEvent {
     pub event: String,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Eq, Ord, PartialEq, PartialOrd)] // Add sorting
 pub struct TimedEvent {
     pub start: String,
     pub end: String,
@@ -21,9 +21,31 @@ pub struct TimedEvent {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
+#[serde(default)] // Use Default impl if field is not encountered in the deserialisation
 pub struct Agenda {
     pub day: Vec<DayEvent>,
     pub timestamp: Vec<TimedEvent>,
+}
+
+impl Default for Agenda {
+    fn default() -> Self {
+        Agenda {
+            day: vec![DayEvent {
+                event: "".to_string(),
+            }],
+            timestamp: vec![TimedEvent {
+                start: "".to_string(),
+                end: "".to_string(),
+                event: "".to_string(),
+            }],
+        }
+    }
+}
+
+pub fn get_entry_dir() -> std::path::PathBuf {
+    let mut filedir: std::path::PathBuf = dirs::cache_dir().expect("Error obtaining $HOME/.cache");
+    filedir.push("crust");
+    return filedir;
 }
 
 pub fn date_to_filedir(day: i32, month: i32, year: i32) -> std::path::PathBuf {
@@ -56,9 +78,11 @@ pub fn parse_agenda_toml(filedir: &mut std::path::PathBuf) -> Agenda {
     let mut contents = String::new();
     file.read_to_string(&mut contents)
         .expect("Unable to read file");
+
     let parsed: toml::Value = toml::from_str(&contents).expect("Error while parsing TOML file");
-    let toml_struct: Agenda = parsed
+    let mut toml_struct: Agenda = parsed
         .try_into()
         .expect("Unable to parse TOML into Agenda struct");
+    toml_struct.timestamp.sort(); // Sort timed events before printing
     return toml_struct;
 }

@@ -4,14 +4,31 @@ extern crate getopts;
 extern crate ratatui;
 
 // Local files
+use crust::agenda_entry::entry;
 use crust::argument_handling::handler;
 use crust::ui::{event_handler, ui_config};
 
-fn main() -> std::io::Result<()> {
-    // Get the arguments for the program and their default values.
-    let program_args: handler::ProgramArguments = handler::parse_arguments();
-    let ui = ui_config::ui_crust_higher_order(program_args);
+use crust::agenda_parser::entry_search;
 
+fn _main() {
+    let paths: Vec<String> = entry_search::get_agenda_entries();
+    println!("{:?}", paths);
+}
+
+fn main() {
+    // Get program arguments or their default values.
+    let program_args: handler::ProgramArguments = handler::parse_arguments();
+    let program_args_for_ui: handler::ProgramArguments = program_args.clone();
+
+    if program_args.open_calendar {
+        let _ = open_ui(program_args_for_ui);
+    } else {
+        entry::handle_agenda_entry(&program_args);
+    }
+}
+
+fn open_ui(program_args: handler::ProgramArguments) -> std::io::Result<()> {
+    let ui = ui_config::ui_crust_higher_order(program_args);
     // Enable raw mode, this disables typical inputs, typed text is not shown on the
     // screen, is not processed when pressing enter, new line character is not processed,
     // etc. Importantly, println! should be replaced by write!. For more information see
@@ -36,7 +53,6 @@ fn main() -> std::io::Result<()> {
     // Enter a UI drawing loop with event handling so we can exit the program
     let mut should_quit = false;
     while !should_quit {
-        //terminal.draw(ui_config::ui_crust)?;
         let _ = terminal.draw(&ui);
         should_quit = event_handler::handle_events()?;
     }

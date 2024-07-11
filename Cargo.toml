@@ -12,3 +12,4 @@ getopts = "0.2.21"
 serde = { version = "1.0.204", features = ["derive"] }
 toml = "0.8.14"
 dirs = "5.0.1"
+regex = "1.10.5"

@@ -5,11 +5,16 @@ extern crate getopts;
 
 // Program argument struct
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ProgramArguments {
     pub day: i32,
     pub month: i32,
     pub year: i32,
+    pub open_calendar: bool,
+    pub entry: String,
+    pub full_day: bool,
+    pub start: String,
+    pub end: String,
 }
 
 impl Default for ProgramArguments {
@@ -21,6 +26,11 @@ impl Default for ProgramArguments {
             day: format!("{}", datetime.format("%d")).parse::<i32>().unwrap(),
             month: format!("{}", datetime.format("%m")).parse::<i32>().unwrap(),
             year: format!("{}", datetime.format("%Y")).parse::<i32>().unwrap(),
+            open_calendar: false,
+            entry: "".to_string(),
+            full_day: false,
+            start: "".to_string(),
+            end: "".to_string(),
         }
     }
 }
@@ -37,6 +47,26 @@ pub fn parse_arguments() -> ProgramArguments {
     opts.optopt("d", "day", "Enter day for calendar.", "DAY");
     opts.optopt("m", "month", "Enter month for calendar", "MONTH");
     opts.optopt("y", "year", "Enter year for calendar", "YEAR");
+    opts.optflag("o", "open", "Open the calendar UI");
+    opts.optopt(
+        "a",
+        "add",
+        "Add entry to current day, or specified day by --day, --month and --year flags",
+        "ENTRY",
+    );
+    opts.optflag("f", "full", "Added entry counts for entire day");
+    opts.optopt(
+        "s",
+        "start",
+        "Starting time of entry, recommended format is xy:zw",
+        "TIME",
+    );
+    opts.optopt(
+        "e",
+        "end",
+        "Ending time of entry, reccommended format is xy:zw",
+        "TIME",
+    );
 
     // Parse the options
     let matches = match opts.parse(&args[1..]) {
@@ -65,6 +95,35 @@ pub fn parse_arguments() -> ProgramArguments {
             .opt_str("y")
             .expect("Unable to extract argument as String");
         return_args.year = read_arg.parse::<i32>().unwrap();
+    }
+
+    if matches.opt_present("o") {
+        return_args.open_calendar = true;
+    }
+
+    if matches.opt_present("a") {
+        let read_args = matches
+            .opt_str("a")
+            .expect("Unable to extract argument as String");
+        return_args.entry = read_args;
+    }
+
+    if matches.opt_present("f") {
+        return_args.full_day = true;
+    }
+
+    if matches.opt_present("s") {
+        let read_args = matches
+            .opt_str("s")
+            .expect("Unable to extract argument as String");
+        return_args.start = read_args;
+    }
+
+    if matches.opt_present("e") {
+        let read_args = matches
+            .opt_str("e")
+            .expect("Unable to extract arguemtn as String");
+        return_args.end = read_args;
     }
 
     return return_args;

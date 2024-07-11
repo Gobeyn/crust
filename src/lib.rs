@@ -1,3 +1,4 @@
+pub mod agenda_entry;
 pub mod agenda_parser;
 pub mod argument_handling;
 pub mod calendar_logic;
