@@ -5,10 +5,10 @@ use ratatui::{prelude::*, widgets::*};
 
 use super::agenda_render;
 use super::calendar_render;
-use crate::agenda_entry::entry;
 use crate::agenda_parser::entry_search;
 use crate::agenda_parser::parser;
 use crate::argument_handling::handler;
+use crate::calendar_logic::date_conversions;
 
 #[derive(Debug)]
 struct MonthAndYear {
@@ -29,6 +29,16 @@ const MONTHS: [&str; 12] = [
     "October",
     "November",
     "December",
+];
+
+const DAYS: [&str; 7] = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
 ];
 
 fn get_next_month_and_year(month_and_year: &MonthAndYear) -> MonthAndYear {
@@ -64,6 +74,38 @@ fn get_month_year_string(month_and_year: &MonthAndYear) -> String {
     let month_string = get_month_string(month_and_year.month);
     let month_year_string = format!(" {} {} ", month_string, month_and_year.year);
     return month_year_string;
+}
+
+fn get_day_string(day_of_week: i32) -> String {
+    let day_string: String = {
+        let day_shift = day_of_week - 1;
+        if day_shift as usize <= DAYS.len() {
+            DAYS[day_shift as usize].to_string()
+        } else {
+            panic!("Day index was out of range.");
+        }
+    };
+    return day_string;
+}
+
+fn get_agenda_entry_title(day: i32, month: i32, year: i32) -> String {
+    let day_of_week = date_conversions::date_to_day_of_the_week(day, month, year);
+    let day_string = get_day_string(day_of_week);
+    let month_string = get_month_string(month);
+    let day_end: &str = {
+        if day == 1 || day == 21 || day == 31 {
+            "st"
+        } else if day == 2 || day == 22 {
+            "nd"
+        } else {
+            "th"
+        }
+    };
+    let agenda_title: String = format!(
+        "  Agenda 󰇙 {}, {} {}{} {} ",
+        day_string, month_string, day, day_end, year
+    );
+    return agenda_title;
 }
 
 pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn Fn(&mut Frame)> {
@@ -107,6 +149,11 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
             .border_style(Style::default().fg(foam));
 
         // Define three subcalendar blocks for the asked for month and two months ahead
+        let current_date = entry_search::Date {
+            day: program_args.day,
+            month: program_args.month,
+            year: program_args.year,
+        };
         let current_month_and_year = MonthAndYear {
             month: program_args.month,
             year: program_args.year,
@@ -144,14 +191,17 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
         let current_month_text = calendar_render::create_calendar_text(
             current_month_and_year.month,
             current_month_and_year.year,
+            &current_date,
         );
         let next_month_text = calendar_render::create_calendar_text(
             next_month_and_year.month,
             next_month_and_year.year,
+            &current_date,
         );
         let second_next_month_text = calendar_render::create_calendar_text(
             second_next_month_and_year.month,
             second_next_month_and_year.year,
+            &current_date,
         );
 
         // Define the paragraph objects for each of the calendar blocks
@@ -176,15 +226,10 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
         frame.render_widget(second_next_month_paragraph, calendar_layout[2]);
 
         // Preview UI
-        let current_date = entry_search::Date {
-            day: program_args.day,
-            month: program_args.month,
-            year: program_args.year,
-        };
         let entries: Vec<entry_search::Date> = entry_search::get_agenda_entries();
         let mut filtered_entries: Vec<entry_search::Date> = entries
             .into_iter()
-            .filter(|entry| entry <= &current_date)
+            .filter(|entry| *entry > current_date)
             .collect();
         filtered_entries.sort();
 
@@ -221,11 +266,10 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
             .border_style(Style::default().fg(foam));
 
         // Define blocks for submodules in preview
+        let current_preview_title =
+            get_agenda_entry_title(program_args.day, program_args.month, program_args.year);
         let current_preview_block = Block::new()
-            .title(format!(
-                " Agenda 󰇙 {}-{}-{} ",
-                program_args.day, program_args.month, program_args.year
-            ))
+            .title(current_preview_title)
             .title_alignment(Alignment::Center)
             .title_style(
                 Style::default()
@@ -236,11 +280,10 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
             .borders(Borders::ALL)
             .border_style(Style::default().fg(pine));
 
+        let next_preview_title =
+            get_agenda_entry_title(next_nonempty.day, next_nonempty.month, next_nonempty.year);
         let next_preview_block = Block::new()
-            .title(format!(
-                " Agenda 󰇙 {}-{}-{} ",
-                next_nonempty.day, next_nonempty.month, next_nonempty.year
-            ))
+            .title(next_preview_title)
             .title_alignment(Alignment::Center)
             .title_style(
                 Style::default()
@@ -292,15 +335,12 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
         let current_preview_paragraph = Paragraph::new(current_preview_text)
             .block(current_preview_block)
             .alignment(Alignment::Left)
-            .wrap(Wrap { trim: true })
-            .scroll((0, 0));
+            .wrap(Wrap { trim: true });
 
         let next_preview_paragraph = Paragraph::new(next_preview_text)
             .block(next_preview_block)
             .alignment(Alignment::Left)
-            .wrap(Wrap { trim: true })
-            .scroll((0, 0));
-
+            .wrap(Wrap { trim: true });
         // Render onto frame
         frame.render_widget(preview_block, layout[1]);
         frame.render_widget(current_preview_paragraph, preview_layout[0]);

@@ -1,5 +1,4 @@
 // External crates
-
 extern crate chrono;
 extern crate getopts;
 
@@ -15,6 +14,8 @@ pub struct ProgramArguments {
     pub full_day: bool,
     pub start: String,
     pub end: String,
+    pub edit: bool,
+    pub remove: bool,
 }
 
 impl Default for ProgramArguments {
@@ -31,6 +32,8 @@ impl Default for ProgramArguments {
             full_day: false,
             start: "".to_string(),
             end: "".to_string(),
+            edit: false,
+            remove: false,
         }
     }
 }
@@ -66,6 +69,19 @@ pub fn parse_arguments() -> ProgramArguments {
         "end",
         "Ending time of entry, reccommended format is xy:zw",
         "TIME",
+    );
+    opts.optflag(
+        "",
+        "edit",
+        "Edit file specified by --day, --month and --year flags or the current day if 
+        not provided. This uses the 
+        default $EDITOR of the system.",
+    );
+    opts.optflag(
+        "",
+        "remove",
+        "Remove agenda entry specified by --day, --month and --year flags 
+        or the current day if not provided.",
     );
 
     // Parse the options
@@ -124,6 +140,14 @@ pub fn parse_arguments() -> ProgramArguments {
             .opt_str("e")
             .expect("Unable to extract arguemtn as String");
         return_args.end = read_args;
+    }
+
+    if matches.opt_present("edit") {
+        return_args.edit = true;
+    }
+
+    if matches.opt_present("remove") {
+        return_args.remove = true;
     }
 
     return return_args;

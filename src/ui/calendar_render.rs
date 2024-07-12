@@ -7,7 +7,11 @@ use ratatui::prelude::*;
 use crate::agenda_parser::entry_search;
 use crate::calendar_logic::date_conversions;
 
-pub fn create_calendar_text(month: i32, year: i32) -> Vec<Line<'static>> {
+pub fn create_calendar_text(
+    month: i32,
+    year: i32,
+    current_date: &entry_search::Date,
+) -> Vec<Line<'static>> {
     let rose = Color::Rgb(234, 154, 151);
     let gold = Color::Rgb(246, 193, 119);
     let darkened_gold = Color::Rgb(151, 92, 10);
@@ -57,7 +61,12 @@ pub fn create_calendar_text(month: i32, year: i32) -> Vec<Line<'static>> {
         };
 
         let style: Style = {
-            if entries.contains(&date) {
+            if date == *current_date {
+                Style::default()
+                    .fg(darkened_gold)
+                    .bg(rose)
+                    .add_modifier(Modifier::BOLD | Modifier::ITALIC)
+            } else if entries.contains(&date) {
                 Style::default()
                     .fg(darkened_gold)
                     .bg(iris)
