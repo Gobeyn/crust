@@ -11,7 +11,7 @@ use crust::ui::{event_handler, ui_config};
 use crust::agenda_parser::entry_search;
 
 fn _main() {
-    let paths: Vec<String> = entry_search::get_agenda_entries();
+    let paths: Vec<entry_search::Date> = entry_search::get_agenda_entries();
     println!("{:?}", paths);
 }
 

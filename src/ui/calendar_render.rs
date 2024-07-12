@@ -4,13 +4,19 @@ extern crate ratatui;
 use ratatui::prelude::*;
 
 // Local files
+use crate::agenda_parser::entry_search;
 use crate::calendar_logic::date_conversions;
 
 pub fn create_calendar_text(month: i32, year: i32) -> Vec<Line<'static>> {
     let rose = Color::Rgb(234, 154, 151);
     let gold = Color::Rgb(246, 193, 119);
+    let darkened_gold = Color::Rgb(151, 92, 10);
     let overlay = Color::Rgb(57, 53, 82);
     let muted = Color::Rgb(110, 106, 134);
+    let iris = Color::Rgb(196, 167, 231);
+
+    let entries: Vec<entry_search::Date> = entry_search::get_agenda_entries();
+    //entries.sort();
 
     let mut calendar_text: Vec<Line> = Vec::new();
     calendar_text.push(Line::from(Span::raw(" ")));
@@ -44,22 +50,30 @@ pub fn create_calendar_text(month: i32, year: i32) -> Vec<Line<'static>> {
     }
 
     for day_counter in 1..=days_in_month {
+        let date = entry_search::Date {
+            day: day_counter,
+            month, // Shorthand for month: month
+            year,
+        };
+
+        let style: Style = {
+            if entries.contains(&date) {
+                Style::default()
+                    .fg(darkened_gold)
+                    .bg(iris)
+                    .add_modifier(Modifier::BOLD)
+            } else {
+                Style::default()
+                    .fg(gold)
+                    .bg(overlay)
+                    .add_modifier(Modifier::BOLD)
+            }
+        };
+
         if day_counter < 10 {
-            days_line.push(Span::styled(
-                format!("│ {}  ", day_counter),
-                Style::default()
-                    .fg(gold)
-                    .bg(overlay)
-                    .add_modifier(Modifier::BOLD),
-            ));
+            days_line.push(Span::styled(format!("│ {}  ", day_counter), style));
         } else {
-            days_line.push(Span::styled(
-                format!("│ {} ", day_counter),
-                Style::default()
-                    .fg(gold)
-                    .bg(overlay)
-                    .add_modifier(Modifier::BOLD),
-            ));
+            days_line.push(Span::styled(format!("│ {} ", day_counter), style));
         }
         weekday_counter += 1;
         if weekday_counter > 7 {

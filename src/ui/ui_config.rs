@@ -5,6 +5,8 @@ use ratatui::{prelude::*, widgets::*};
 
 use super::agenda_render;
 use super::calendar_render;
+use crate::agenda_entry::entry;
+use crate::agenda_parser::entry_search;
 use crate::agenda_parser::parser;
 use crate::argument_handling::handler;
 
@@ -174,6 +176,29 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
         frame.render_widget(second_next_month_paragraph, calendar_layout[2]);
 
         // Preview UI
+        let current_date = entry_search::Date {
+            day: program_args.day,
+            month: program_args.month,
+            year: program_args.year,
+        };
+        let entries: Vec<entry_search::Date> = entry_search::get_agenda_entries();
+        let mut filtered_entries: Vec<entry_search::Date> = entries
+            .into_iter()
+            .filter(|entry| entry <= &current_date)
+            .collect();
+        filtered_entries.sort();
+
+        let next_nonempty: entry_search::Date = {
+            if filtered_entries.len() >= 2 {
+                if filtered_entries[0] == current_date {
+                    filtered_entries[1].clone()
+                } else {
+                    filtered_entries[0].clone()
+                }
+            } else {
+                current_date
+            }
+        };
 
         let preview_layout = Layout::new(
             Direction::Vertical,
@@ -212,7 +237,10 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
             .border_style(Style::default().fg(pine));
 
         let next_preview_block = Block::new()
-            .title(" Agenda [NEXT NON-EMPTY] ")
+            .title(format!(
+                " Agenda 󰇙 {}-{}-{} ",
+                next_nonempty.day, next_nonempty.month, next_nonempty.year
+            ))
             .title_alignment(Alignment::Center)
             .title_style(
                 Style::default()
@@ -242,6 +270,24 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
             }
         };
 
+        let mut next_preview_filedir: std::path::PathBuf =
+            parser::date_to_filedir(next_nonempty.day, next_nonempty.month, next_nonempty.year);
+
+        let next_preview_text = {
+            if std::path::Path::exists(&next_preview_filedir) {
+                let next_preview_agenda: parser::Agenda =
+                    parser::parse_agenda_toml(&mut next_preview_filedir);
+                agenda_render::create_agenda_text(next_preview_agenda)
+            } else {
+                let mut agenda_text: Vec<Line> = Vec::new();
+                agenda_text.push(Line::from(Span::styled(
+                    "No entry for this date.",
+                    Style::default().fg(love).add_modifier(Modifier::BOLD),
+                )));
+                agenda_text
+            }
+        };
+
         // Define paragraphs for preview boxes
         let current_preview_paragraph = Paragraph::new(current_preview_text)
             .block(current_preview_block)
@@ -249,9 +295,15 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
             .wrap(Wrap { trim: true })
             .scroll((0, 0));
 
+        let next_preview_paragraph = Paragraph::new(next_preview_text)
+            .block(next_preview_block)
+            .alignment(Alignment::Left)
+            .wrap(Wrap { trim: true })
+            .scroll((0, 0));
+
         // Render onto frame
         frame.render_widget(preview_block, layout[1]);
         frame.render_widget(current_preview_paragraph, preview_layout[0]);
-        frame.render_widget(next_preview_block, preview_layout[1]);
+        frame.render_widget(next_preview_paragraph, preview_layout[1]);
     })
 }
