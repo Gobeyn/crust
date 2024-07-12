@@ -229,7 +229,7 @@ pub fn ui_crust_higher_order(program_args: handler::ProgramArguments) -> Box<dyn
         let entries: Vec<entry_search::Date> = entry_search::get_agenda_entries();
         let mut filtered_entries: Vec<entry_search::Date> = entries
             .into_iter()
-            .filter(|entry| *entry > current_date)
+            .filter(|entry| *entry >= current_date)
             .collect();
         filtered_entries.sort();
 
