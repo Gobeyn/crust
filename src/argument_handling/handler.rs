@@ -149,6 +149,5 @@ pub fn parse_arguments() -> ProgramArguments {
     if matches.opt_present("remove") {
         return_args.remove = true;
     }
-
     return return_args;
 }
