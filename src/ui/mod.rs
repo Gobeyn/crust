@@ -1,4 +1,4 @@
-pub mod agenda_render;
-pub mod calendar_render;
-pub mod event_handler;
-pub mod ui_config;
+pub mod agenda;
+pub mod calendar;
+pub mod ui;
+pub mod window;

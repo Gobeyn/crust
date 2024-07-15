@@ -1,5 +1,6 @@
-pub mod agenda_entry;
-pub mod agenda_parser;
-pub mod argument_handling;
-pub mod calendar_logic;
+pub mod args;
+pub mod configuration;
+pub mod date;
+pub mod file;
+pub mod key;
 pub mod ui;
