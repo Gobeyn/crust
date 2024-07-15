@@ -9,6 +9,8 @@ use crate::configuration::config;
 use crate::date::date;
 use crate::file;
 
+// TODO: Read up on lifetimes so we can use references to `ProgramArguments` and `Config` instead
+// of taking ownership and needing to copy it multiple times in the window.rs and main.rs files.
 /// Create UI with `ProgramArguments` filled in as arguments.
 ///
 /// Function returns a function on the `Frame` as required by `Ratatui`.

@@ -1,3 +1,5 @@
+// TODO: Add by week and by month movements while the UI is running.
+
 extern crate crossterm;
 extern crate ratatui;
 
