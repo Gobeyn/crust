@@ -11,6 +11,9 @@ use crate::file;
 
 // TODO: Read up on lifetimes so we can use references to `ProgramArguments` and `Config` instead
 // of taking ownership and needing to copy it multiple times in the window.rs and main.rs files.
+// TODO: Add an error UI like `btop` when the UI is too small for the default and the restricted
+// UI.
+
 /// Create UI with `ProgramArguments` filled in as arguments.
 ///
 /// Function returns a function on the `Frame` as required by `Ratatui`.
@@ -233,5 +236,69 @@ pub fn ui_pre_args(
         frame.render_widget(agenda_block, layout[1]);
         frame.render_widget(given_agenda_par, agenda_layout[0]);
         frame.render_widget(next_agenda_par, agenda_layout[1]);
+    })
+}
+
+/// Same as `ui_pre_args` but for a restricted, vertical half-screen, layout.
+pub fn ui_restricted_vertical_pre_args(
+    program_args: args::parser::ProgramArguments,
+    conf: config::Config,
+) -> Box<dyn Fn(&mut Frame)> {
+    Box::new(move |frame: &mut Frame| {
+        // Define layout
+        let layout = Layout::new(
+            Direction::Vertical,
+            [Constraint::Percentage(33), Constraint::Percentage(66)],
+        )
+        .split(frame.size());
+
+        // ========== Calendar UI ==========
+        let cal_title = program_args.date.calendar_title();
+        let cal_block = Block::new()
+            .title(cal_title)
+            .title_alignment(Alignment::Center)
+            .title_style(
+                Style::default()
+                    .fg(conf.calendar_month_title)
+                    .add_modifier(Modifier::BOLD),
+            )
+            .border_type(BorderType::Rounded)
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(conf.calendar_month_box));
+        let cal_text = calendar::render(&program_args.date, &program_args.date, &conf);
+        let cal_par = Paragraph::new(cal_text)
+            .block(cal_block)
+            .alignment(Alignment::Center)
+            .wrap(Wrap { trim: true });
+        frame.render_widget(cal_par, layout[0]);
+
+        // ========== Agenda UI ==========
+        let agenda_title = program_args.date.agenda_title();
+        let agenda_block = Block::new()
+            .title(agenda_title)
+            .title_alignment(Alignment::Center)
+            .title_style(
+                Style::default()
+                    .fg(conf.agenda_entry_title)
+                    .add_modifier(Modifier::BOLD | Modifier::ITALIC),
+            )
+            .border_type(BorderType::Rounded)
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(conf.agenda_entry_box));
+        let agenda_text = match program_args.date.get_agenda() {
+            Some(ag) => agenda::render(&ag, &conf),
+            None => {
+                let txt: Vec<Line> = vec![Line::from(Span::styled(
+                    "No entry for this date.",
+                    Style::default().fg(conf.agenda_entry_full_day_event),
+                ))];
+                txt
+            }
+        };
+        let agenda_par = Paragraph::new(agenda_text)
+            .block(agenda_block)
+            .alignment(Alignment::Left)
+            .wrap(Wrap { trim: true });
+        frame.render_widget(agenda_par, layout[1]);
     })
 }

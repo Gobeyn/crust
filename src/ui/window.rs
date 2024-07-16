@@ -1,6 +1,9 @@
 // External crates
 extern crate crossterm;
 extern crate ratatui;
+extern crate termsize;
+// TODO: Find a better way to determine if the terminal is large enough for the default layout.
+// currently it is hard coded if the columns is less than 80, the restricted layout is used.
 
 // Local files
 use super::ui;
@@ -15,7 +18,23 @@ use crate::key::event;
 pub fn create_window(program_args: args::parser::ProgramArguments, conf: config::Config) {
     let prog_args_copy = program_args.clone();
     let conf_copy = conf.clone();
-    let mut user_interface = ui::ui_pre_args(program_args, conf);
+
+    let mut user_interface = {
+        let mut nosize = false;
+        let size: termsize::Size = match termsize::get() {
+            Some(s) => s,
+            None => {
+                nosize = true;
+                termsize::Size { rows: 0, cols: 0 }
+            }
+        };
+
+        if size.cols >= 80 || nosize {
+            ui::ui_pre_args(program_args, conf)
+        } else {
+            ui::ui_restricted_vertical_pre_args(program_args, conf)
+        }
+    };
 
     // Enable raw mode, this disables typical user input like typing.
     let _ = match crossterm::terminal::enable_raw_mode() {
@@ -64,8 +83,23 @@ pub fn create_window(program_args: args::parser::ProgramArguments, conf: config:
                 let conf_ui = conf_copy.clone();
                 // Update the `date` stored in the program arguments.
                 prog_args_ui.date.add_days(day_shift_counter);
+                // Get the current terminal size
+                let mut nosize = false;
+                let size: termsize::Size = match termsize::get() {
+                    Some(s) => s,
+                    None => {
+                        nosize = true;
+                        termsize::Size { rows: 0, cols: 0 }
+                    }
+                };
                 // Update the UI.
-                user_interface = ui::ui_pre_args(prog_args_ui, conf_ui);
+                user_interface = {
+                    if size.cols >= 80 || nosize {
+                        ui::ui_pre_args(prog_args_ui, conf_ui)
+                    } else {
+                        ui::ui_restricted_vertical_pre_args(prog_args_ui, conf_ui)
+                    }
+                };
             }
             event::KeyEvents::Previous => {
                 // Update date shift.
@@ -75,8 +109,23 @@ pub fn create_window(program_args: args::parser::ProgramArguments, conf: config:
                 let conf_ui = conf_copy.clone();
                 // Update the `date` stored in the program arguments.
                 prog_args_ui.date.add_days(day_shift_counter);
+                // Get the current terminal size
+                let mut nosize = false;
+                let size: termsize::Size = match termsize::get() {
+                    Some(s) => s,
+                    None => {
+                        nosize = true;
+                        termsize::Size { rows: 0, cols: 0 }
+                    }
+                };
                 // Update the UI.
-                user_interface = ui::ui_pre_args(prog_args_ui, conf_ui);
+                user_interface = {
+                    if size.cols >= 80 || nosize {
+                        ui::ui_pre_args(prog_args_ui, conf_ui)
+                    } else {
+                        ui::ui_restricted_vertical_pre_args(prog_args_ui, conf_ui)
+                    }
+                };
             }
             _ => {}
         }
