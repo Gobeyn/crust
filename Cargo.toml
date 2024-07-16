@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# termsize = "0.1"
+termsize = "0.1.8"
 ratatui = "0.27.0"
 crossterm = "0.27.0"
 chrono = "0.4.38"
