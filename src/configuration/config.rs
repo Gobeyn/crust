@@ -1,6 +1,8 @@
 // TODO: Add a way to search for $HOME/.config/crust/crust.toml for user defined configuration
 // instead of the default, along with a way to use that user defined configuration.
 
+// TODO: Restructure the `Config` structure in a toml deserializable way as we did with the `Agenda` struct.
+
 // External crates
 extern crate ratatui;
 use ratatui::prelude::*;

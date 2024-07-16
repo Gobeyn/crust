@@ -10,6 +10,7 @@ use std::io::Write;
 
 // Local files
 use crate::args;
+use crate::configuration::config;
 use crate::date::date;
 
 /// Store full day events.
