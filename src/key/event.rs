@@ -1,4 +1,5 @@
 // TODO: Add by week and by month movements while the UI is running.
+// TODO: Let the key that needs to be pressed be handled by the configuration.
 
 extern crate crossterm;
 extern crate ratatui;

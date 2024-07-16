@@ -1,5 +1,6 @@
 // TODO: Add a way to search for $HOME/.config/crust/crust.toml for user defined configuration
 // instead of the default, along with a way to use that user defined configuration.
+// TODO: Add configuration for keybinds.
 
 // External crates
 extern crate ratatui;
