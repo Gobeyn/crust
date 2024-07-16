@@ -1,8 +1,10 @@
 // TODO: Add by week and by month movements while the UI is running.
-// TODO: Let the key that needs to be pressed be handled by the configuration.
 
 extern crate crossterm;
 extern crate ratatui;
+
+// Local files
+use crate::configuration::config;
 
 /// Descriptors for possible key events.
 pub enum KeyEvents {
@@ -11,16 +13,13 @@ pub enum KeyEvents {
     Next,
     Previous,
 }
+
 /// Get key press event if special character is pressed.
 ///
 /// Collect events via `crossterm`, determine if that event is a key press and return a
-/// `KeyEvents` code for special characters:
-/// - q: `Quit`,
-/// - n: `Next`,
-/// - p: `Previous`,
-/// - _: `NoEvent`
-/// If an error occurs when obtaining events, `NoEvent` is also returned.
-pub fn get_key_event() -> KeyEvents {
+/// `KeyEvents` code for special characters determined by the configuration. If a key is pressed
+/// with no attached functionality, or an error occurs `NoEvent` is returned.
+pub fn get_key_event(conf: &config::Config) -> KeyEvents {
     // Get events every 50 ms, return None if an error occurred.
     match crossterm::event::poll(std::time::Duration::from_millis(50)) {
         Ok(_) => {
@@ -36,11 +35,11 @@ pub fn get_key_event() -> KeyEvents {
                 // Check that the key-related event was a key press.
                 if key.kind == crossterm::event::KeyEventKind::Press {
                     // Return KeyEvents code for special key-presses.
-                    if key.code == crossterm::event::KeyCode::Char('q') {
+                    if key.code == crossterm::event::KeyCode::Char(conf.key_quit) {
                         return KeyEvents::Quit;
-                    } else if key.code == crossterm::event::KeyCode::Char('n') {
+                    } else if key.code == crossterm::event::KeyCode::Char(conf.key_next) {
                         return KeyEvents::Next;
-                    } else if key.code == crossterm::event::KeyCode::Char('p') {
+                    } else if key.code == crossterm::event::KeyCode::Char(conf.key_previous) {
                         return KeyEvents::Previous;
                     } else {
                         return KeyEvents::NoEvent;

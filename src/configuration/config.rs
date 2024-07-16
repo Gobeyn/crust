@@ -1,6 +1,5 @@
 // TODO: Add a way to search for $HOME/.config/crust/crust.toml for user defined configuration
 // instead of the default, along with a way to use that user defined configuration.
-// TODO: Add configuration for keybinds.
 
 // External crates
 extern crate ratatui;
@@ -38,6 +37,9 @@ pub struct Config {
     pub agenda_entry_box: Color,
     pub agenda_entry_full_day_event: Color,
     pub agenda_entry_timed_event: Color,
+    pub key_quit: char,
+    pub key_next: char,
+    pub key_previous: char,
 }
 
 impl Default for Config {
@@ -62,6 +64,9 @@ impl Default for Config {
             agenda_entry_box: PINE,
             agenda_entry_full_day_event: PINE,
             agenda_entry_timed_event: IRIS,
+            key_quit: 'q',
+            key_next: 'n',
+            key_previous: 'p',
         }
     }
 }

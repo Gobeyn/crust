@@ -51,7 +51,7 @@ pub fn create_window(program_args: args::parser::ProgramArguments, conf: config:
     let mut day_shift_counter = 0;
     while run {
         let _ = terminal.draw(&user_interface);
-        let key_event: event::KeyEvents = event::get_key_event();
+        let key_event: event::KeyEvents = event::get_key_event(&conf_copy);
         match key_event {
             event::KeyEvents::Quit => {
                 run = false;
