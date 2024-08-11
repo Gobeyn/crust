@@ -13,6 +13,8 @@ use crate::file;
 // of taking ownership and needing to copy it multiple times in the window.rs and main.rs files.
 // TODO: Add an error UI like `btop` when the UI is too small for the default and the restricted
 // UI.
+// TODO: Add yearly repeating events with special color and icon for holidays
+// TODO: Add synchronization with google calendar via their API.
 
 /// Create UI with `ProgramArguments` filled in as arguments.
 ///
