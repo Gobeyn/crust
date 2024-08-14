@@ -14,7 +14,7 @@ To install `crust` you need:
 
 To install `crust`, first clone the repository:
 ```
-$ git clone [...]
+$ git clone https://github.com/Gobeyn/crust.git
 ```
 Then, build the application:
 ```
