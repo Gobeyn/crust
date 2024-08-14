@@ -4,8 +4,16 @@ use crust::configuration::config;
 use crust::file;
 use crust::ui::window;
 
-// TODO: Check if the $HOME/.cache/crust/ folder exists, if not, create it first.
+extern crate dirs;
+
 fn main() {
+    // Create $HOME/.cache/crust/ if it does not exist.
+    let mut folderdir = dirs::cache_dir().expect("Error obtaining $HOME/.cache/");
+    folderdir.push("crust");
+    if !folderdir.exists() {
+        std::fs::create_dir(folderdir).expect("Error creating $HOME/.cache/crust/")
+    }
+
     let prog_args = args::parser::parse_arguments();
     let prog_args_ui = prog_args.clone();
     let conf = config::Config::default();
