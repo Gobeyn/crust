@@ -4,6 +4,7 @@ use crust::configuration::config;
 use crust::file;
 use crust::ui::window;
 
+// TODO: Check if the $HOME/.cache/crust/ folder exists, if not, create it first.
 fn main() {
     let prog_args = args::parser::parse_arguments();
     let prog_args_ui = prog_args.clone();
